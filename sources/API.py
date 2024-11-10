@@ -18,21 +18,32 @@ from bs4 import BeautifulSoup
 
 
 class CalendarXLink:
-    def __init__(self, nom: str, id: str, racine: str = "webcal://edt.univ-angers.fr/edt/ics?id="):
+    def __init__(self, nom: str, id: str, racine: str = "webcal://edt.univ-angers.fr/edt/ics?id=S"):
         self.nom = nom
         self.id = id
         
         self.link = racine + id
+    
+    def __str__(self):
+        return f"nom: {self.nom}, id: {self.id} (lien webcall {self.link})"
+    
+
+def make_doc_name_ok(doc_name):
+    unacceptable = ['\\', '/', '*', ':', '?', '"', '<', '>', '|', '\n']
+    new_name = ""
+    for letter in doc_name:
+        if letter not in unacceptable:
+            new_name += letter
+    
+    return new_name
 
 
-
-def est_calendrier_sauvable(cal: CalendarXLink) -> bool:
+# Renvoie Bool, + sauvegarde en local le fichier ics associé
+def est_calendrier_sauvable(cal: CalendarXLink, dossier: str = "../salles") -> bool:
     
     http_url = cal.link.replace('webcal://', 'https://')
     
     response = requests.get(http_url)
-
-    print(response.status_code)
 
     if(response.status_code != 200):
         return False
@@ -40,18 +51,20 @@ def est_calendrier_sauvable(cal: CalendarXLink) -> bool:
         
         ics_content: str = response.text
         
-        with open(f'{cal.nom}.ics', 'w', encoding='utf-8') as f:
+        with open(f'{dossier}/{make_doc_name_ok(cal.nom)}.ics', 'w', encoding='utf-8') as f:
             f.write(ics_content)
         
         return True
 
-def test_est_calendrier_sauvable(webcall_url: str):
+
+def test_est_calendrier_sauvable(webcall_url: str) -> bool:
     if(est_calendrier_sauvable(webcal_url)):
         print("Calendrier enregistré")
     else:
         print("Calendarlendrier pas enregistré")
 
 
+# un premier essai de récupération des liens utiles
 def prototype_recherche_liens_edt_salles_univ_angers():
     response = requests.get("https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B")
     if(response.status_code != 200):
@@ -73,9 +86,53 @@ def prototype_recherche_liens_edt_salles_univ_angers():
             
             # On récupère le lien
             link = tag_a.get('href')
+            # Et son texte
+            nom = tag_a.text
             
-            print(f"{tag_a.text = }, {link = }")
+            print(f"{nom = }, {link = }")
 
+
+# Récupère l'id, en partant du lien de racine "./ressource?type=s9FDC055BB1C34F92E0530100007F467B"
+def link_to_id(link: str) -> str:
+    # L'id, c'est les 32 derniers caractères du lien :)
+    return link[-32::]
+
+
+def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B"):
+    
+    # Récupération de la page web
+    response = requests.get(page_principale)
+    
+    if(response.status_code != 200):
+        print("Code différent de 200:", response.status_code)
+    else:
+        print("soupage en cours")
+        
+        # On transforme le fichier texte html en objet parsable
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # liste de tout les <td> contenant l'attribut scope="row"
+        filtre_td = soup.find_all("td", attrs={"scope": "row"})
+        
+        print("enregistrement des calendriers")
+        # On passe dans la liste
+        for tag_td in filtre_td:
+            
+            # On ne s'occupe que de <a> dans le <td>
+            tag_a = tag_td.a
+            
+            # On récupère le lien
+            link = tag_a.get('href')
+            
+            # Et son texte
+            nom = tag_a.text
+            
+            cal = CalendarXLink(nom, link_to_id(link))
+            
+            if(not est_calendrier_sauvable(cal)):
+                print(f"{cal.nom} n'est pas sauvegardé")
+            else:
+                print(f"{cal.nom} OK")
 
 
 
@@ -91,9 +148,7 @@ for event in calendar.events:
     print(f"Description : {event.description}")
     print("-" * 20)
 """
-    
-    
-    
+
 
 def main():
     # URL du fichier ICS (avec un schéma webcal://)
@@ -106,9 +161,11 @@ def main():
     test_est_calendrier_sauvable(webcall)
     '''
     
+    '''
     prototype_recherche_liens_edt_salles_univ_angers()
+    '''
     
-    
+    sauve_tous_calendrier()
 
 
 
