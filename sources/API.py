@@ -64,6 +64,46 @@ def test_est_calendrier_sauvable(webcall_url: str) -> bool:
         print("Calendarlendrier pas enregistré")
 
 
+"""
+On dira que les salles intéressantes sont:
+- les amphis du bat A
+- les salles A1XX
+
+- les salles G
+- les salles H
+- les salles i (attention, i ***minuscule***)
+- les amphis du bat L
+- les salles L
+- Rez de jardin (:
+"""
+
+def est_dans_bat_etage_1_2(cal: CalendarXLink, bat: chr) -> bool:
+    #On récupère les 2 premiers charactères du nom
+    pref = cal.nom[:2]
+    
+    return (pref == bat+"1") or (pref == bat+"2")
+
+
+def est_bat_A(cal: CalendarXLink) -> bool:
+    return est_dans_bat_etage_1_2(cal, 'A') or (cal.nom in ("AMPHI A Sciences", "AMPHI B Sciences", "AMPHI D Sciences", "AMPHI E Sciences"))
+
+def est_bat_G(cal: CalendarXLink) -> bool:
+    return est_dans_bat_etage_1_2(cal, "G")
+
+def est_bat_H(cal: CalendarXLink) -> bool:
+    return est_dans_bat_etage_1_2(cal, "H")
+
+def est_bat_i(cal: CalendarXLink) -> bool:
+    pref = cal.nom[:2]
+    return (pref == "i0")
+
+def est_bat_L(cal: CalendarXLink) -> bool:
+    # les espaces en plus aux noms d'amphis sont fait exprès :D (le fichier html est fait comme ça)
+    return est_dans_bat_etage_1_2(cal, "L") or (cal.nom in ("AMPHI L001", "AMPHI L002  ", "AMPHI L003 ", "AMPHI L004 ", "AMPHI L005", "AMPHI L006", "Rez-de-Jardin"))
+
+def est_salles_importante(cal: CalendarXLink) -> bool:
+    return est_bat_A(cal) or est_bat_G(cal) or est_bat_H(cal) or est_bat_i(cal) or est_bat_L(cal)
+
 # un premier essai de récupération des liens utiles
 def prototype_recherche_liens_edt_salles_univ_angers():
     response = requests.get("https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B")
@@ -115,7 +155,11 @@ def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt
         filtre_td = soup.find_all("td", attrs={"scope": "row"})
         
         print("enregistrement des calendriers")
+        
+        print("Il y a", len(filtre_td), "salles")
         # On passe dans la liste
+        
+        nb_enregistrées = 0
         for tag_td in filtre_td:
             
             # On ne s'occupe que de <a> dans le <td>
@@ -129,11 +173,56 @@ def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt
             
             cal = CalendarXLink(nom, link_to_id(link))
             
-            if(not est_calendrier_sauvable(cal)):
-                print(f"{cal.nom} n'est pas sauvegardé")
+            if est_salles_importante(cal):
+                nb_enregistrées += 1
+                if(not est_calendrier_sauvable(cal)):
+                    print(f"{cal.nom} important, mais pas sauvegardé (ERREUR)")
+                else:
+                    print(f"{cal.nom} OK")
             else:
-                print(f"{cal.nom} OK")
+                print(f"{cal.nom} pas important")
+        
+        print(f"Il y a {nb_enregistrées} salles importantes")
 
+
+# exemple avec amphi A: "https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B&id=9F8A5BD6A61E88EDE0530100007FD17D"
+# lien d'une salle:  type='id_page_principale'&id='id_de_la_salle'     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+def proto_affiche_une_semaine(cal: CalendarXLink, racine: str = "https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B"):
+    
+    page_une_salle = racine + "&id=" + cal.id
+    
+    response = requests.get(page_une_salle)
+    
+    if(response.status_code != 200):
+        print("code diff de 200 ("+response.status_code+"), fin de", cal.nom)
+    else:
+        print("soupage de", cal.nom)
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        print(soup.prettify)
+        
+        # liste tous les th de class = "fc-day-header" (ils contiennent les infos sur la date)
+        filtre_th = soup.find_all("th", attrs={"class": "fc-day-header"})
+        
+        print(filtre_th)
+        
+        # trouve les div de class = "fc-content-col" (contient les évènements pour une journée donnée)
+        filtre_div = soup.find_all("div", attrs={"class": "fc-event-container"})
+        # on ne prend que ceux contenant uniquement l'attribut "fc-event-container"
+        filtre_div = [div for div in filtre_div if div.get("class") == ["fc-event-container"]]
+        
+        for i, date in enumerate(filtre_th):
+            print("------", date.text, "------")
+            
+            events = filtre_div[i].find_all("a")
+            
+            for event in events:
+                event = event.div
+                event("div")
+                print(event[0].text)
+                print(event[1].text)
+                print("-")
 
 
 """
@@ -166,8 +255,12 @@ def main():
     '''
     
     sauve_tous_calendrier()
-
-
+    
+    """
+    cal = CalendarXLink("Amphi A", "9F8A5BD6A61E88EDE0530100007FD17D")
+    
+    proto_affiche_une_semaine(cal)
+    """
 
 if __name__ == "__main__":
     main()
