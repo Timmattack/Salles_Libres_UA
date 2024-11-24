@@ -71,7 +71,7 @@ On dira que les salles intéressantes sont:
 
 - les salles G
 - les salles H
-- les salles i (attention, i ***minuscule***)
+- les salles I
 - les amphis du bat L
 - les salles L
 - Rez de jardin (:
@@ -93,9 +93,9 @@ def est_bat_G(cal: CalendarXLink) -> bool:
 def est_bat_H(cal: CalendarXLink) -> bool:
     return est_dans_bat_etage_1_2(cal, "H")
 
-def est_bat_i(cal: CalendarXLink) -> bool:
+def est_bat_I(cal: CalendarXLink) -> bool:
     pref = cal.nom[:2]
-    return (pref == "i0")
+    return (pref == "I0")
 
 def est_bat_L(cal: CalendarXLink) -> bool:
     # les espaces en plus aux noms d'amphis sont fait exprès :D (le fichier html est fait comme ça)
