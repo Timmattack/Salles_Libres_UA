@@ -16,11 +16,12 @@ on se limitera à vérifier les horaires entre 7h30 et 19h00 (pour une journée)
 3- ?? créer un ics de salles libre ??
 """
 
-# pip install tzdata
-# TIMEZONE LIST EXEMPLES
-# UTC +1: "Europe/Paris"
-# UTC +0: "Zulu"
-# UTC -5: "America/New_York"
+''' tzdata names:
+TIMEZONE LIST EXEMPLES
+UTC +1: "Europe/Paris"
+UTC +0: "Zulu"
+UTC -5: "America/New_York"
+'''
 
 def debut_fin_event(event):
     if(event):
@@ -45,11 +46,7 @@ def cool_print_date(date: arrow.arrow.Arrow) -> None:
     date.hour, ":", date.minute)
 
 
-
-
-
-
-def printEvenementToday(calendar: Calendar) -> None:
+def print_evenement_today(calendar: Calendar) -> None:
 
     for element in calendar.events:
 
@@ -59,15 +56,6 @@ def printEvenementToday(calendar: Calendar) -> None:
             print("TODAY : ", element.begin, " WITH ", element.name)
 
     
-def printEvenementAtTime(calendar: Calendar, timeToCheck: datetime) -> None:
-
-    for element in calendar.events:
-
-        elementTime = element.begin
-
-        if elementTime == timeToCheck:
-            print(elementTime, " / " ,element.name)
-
 def afficher_evenement_heure_locale(event: Event, tz: timezone) -> None:
     begin = event.begin.astimezone(tz)
     end = event.end.astimezone(tz)
@@ -75,34 +63,26 @@ def afficher_evenement_heure_locale(event: Event, tz: timezone) -> None:
     print("[DEBUT]>", begin, " [FIN]>", end, " [NOM]>", event.name)
 
 
-def timeIsInEvent( begin: datetime, end: datetime, timeToCheck: datetime) -> bool:
-
-    
-    
-    if ( begin < timeToCheck and timeToCheck < end):
+def temps_entre_deux_event( begin: datetime, time_check: datetime, end: datetime) -> bool:
+    if begin < time_check and time_check < end:
         return True
+    
     return False
 
 
-def estSalleLibre(salle_file_path: str, timeToCheck: datetime) -> bool:
+def est_salle_libre(salle_file_path: str, time_check: datetime) -> bool:
 
     # on ouvre le fichier ics de la salle :
     with open(salle_file_path, 'r') as file:
         calendar = Calendar(file.read())
 
-    #Si la salle a un evenement à "TimeToCheck" alors est n'est pas libre -> return false, sinon -> true
-    #printEvenementToday(calendar)
     for element in calendar.events: # on regarde tout les evenements d'une salle, si aucun d'eux ne pose problème, alors elle est libre
-        #eventTime: datetime = element.begin.datetime
-        begin_lt = element.begin.astimezone(timezone("Europe/Paris")) # Begin local time
-        end_lt = element.end.astimezone(timezone("Europe/Paris")) # Begin local time
-
-        if timeIsInEvent( element.begin , element.end, timeToCheck):
-            
-            afficher_evenement_heure_locale(element, timezone("Europe/Paris"))
+        if temps_entre_deux_event(element.begin ,time_check, element.end):
+            #afficher_evenement_heure_locale(element, timezone("Europe/Paris"))
             return False
-    print(" ")
+        
     return True
+
 
 def iterations_event(file_path: str) -> None:
     # Open the ics file 
@@ -120,21 +100,28 @@ def iterations_event(file_path: str) -> None:
                 print(date, " / ",element.get("summary"))
 
 
-def main() -> None:
 
+def print_salles_libre_at():
+
+    chemin_salles = "salles"
     paris_tz = timezone("Europe/Paris")
-
-
-
     customTime = datetime( 2024, 12, 6, 15, 55, 0)
     customTime = customTime.replace(tzinfo=paris_tz)
 
+    filenames = next(walk(chemin_salles), (None, None, []))[2]
 
-    if estSalleLibre("salles/L101 Multimédia.ics", customTime):
-        print(" L101 est libre ! :", customTime)
-    else:
-        print(" L101 prise à :", customTime)
-    print(" ")
+    for file in filenames:
+        #print(file)
+        if est_salle_libre(file, customTime):
+            print(file, "est libre")
+
+
+
+def main() -> None:
+
+
+
+    print_salles_libre_at()
 
 
 
