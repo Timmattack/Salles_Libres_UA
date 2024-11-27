@@ -3,6 +3,7 @@ import arrow
 from datetime import datetime, date, timedelta
 from pytz import timezone
 from zoneinfo import ZoneInfo
+from os import walk
 
 """
 Objectif:
@@ -14,6 +15,12 @@ on se limitera à vérifier les horaires entre 7h30 et 19h00 (pour une journée)
 2- récupérer les dates des évènements (la paire début et fin)
 3- ?? créer un ics de salles libre ??
 """
+
+# pip install tzdata
+# TIMEZONE LIST EXEMPLES
+# UTC +1: "Europe/Paris"
+# UTC +0: "Zulu"
+# UTC -5: "America/New_York"
 
 def debut_fin_event(event):
     if(event):
@@ -61,14 +68,16 @@ def printEvenementAtTime(calendar: Calendar, timeToCheck: datetime) -> None:
         if elementTime == timeToCheck:
             print(elementTime, " / " ,element.name)
 
+def afficher_evenement_heure_locale(event: Event, tz: timezone) -> None:
+    begin = event.begin.astimezone(tz)
+    end = event.end.astimezone(tz)
+    print("- - -")
+    print("[DEBUT]>", begin, " [FIN]>", end, " [NOM]>", event.name)
+
 
 def timeIsInEvent( begin: datetime, end: datetime, timeToCheck: datetime) -> bool:
 
-    # pip install tzdata
-    # TIMEZONE LIST EXEMPLES
-    # UTC +1: "Europe/Paris"
-    # UTC +0: "Zulu"
-    # UTC -5: "America/New_York"
+    
     
     if ( begin < timeToCheck and timeToCheck < end):
         return True
@@ -89,9 +98,8 @@ def estSalleLibre(salle_file_path: str, timeToCheck: datetime) -> bool:
         end_lt = element.end.astimezone(timezone("Europe/Paris")) # Begin local time
 
         if timeIsInEvent( element.begin , element.end, timeToCheck):
-            # si la date que l'on cherche est dans l'évenement, ça dégage
-            print(" ")
-            print( "FALSE :", begin_lt , "-", end_lt, " WITH ", element.name )
+            
+            afficher_evenement_heure_locale(element, timezone("Europe/Paris"))
             return False
     print(" ")
     return True
@@ -111,31 +119,10 @@ def iterations_event(file_path: str) -> None:
             if date == datetime.now():
                 print(date, " / ",element.get("summary"))
 
+
 def main() -> None:
 
     paris_tz = timezone("Europe/Paris")
-
-    # with open("salles/L101 Multimédia.ics", 'r') as file:
-    #     calendar = Calendar(file.read())
-
-    #     for event in calendar.events:
-    #         #print(event.begin, " ", event.name)
-    #         # Convert event time to datetime (ensure timezone awareness)
-    #         event_time = event.begin.datetime  # Ensure we get a datetime object
-
-    #     # If the datetime is naive (no tzinfo), assume UTC
-    #         if event_time.tzinfo is None:
-    #             event_time = event_time.replace(tzinfo=timezone("UTC"))
-
-    #     # Convert to Paris time
-    #         local_time = event_time.astimezone(paris_tz)
-    #         print(local_time, " ", event.name)
-
-
-
-
-
-
 
 
 
@@ -149,17 +136,6 @@ def main() -> None:
         print(" L101 prise à :", customTime)
     print(" ")
 
-    # if estSalleLibre("salles/L106 Multimédia.ics", customTime):
-    #     print(" L106 est libre ! :", customTime)
-    # else:
-    #     print(" L106 prise à :", customTime)
-    # print(" ")
-
-    # if estSalleLibre("salles/A116 Multimédia.ics", customTime):
-    #     print(" A116 est libre ! :", customTime)
-    # else:
-    #     print(" A116 prise à :", customTime)
-    # print(" ")
 
 
 if __name__ == "__main__":
