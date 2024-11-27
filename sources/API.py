@@ -45,7 +45,7 @@ def main():
     
     # A116:     webcal://edt.univ-angers.fr/edt/ics?id=S9F8A5BD6A60A88EDE0530100007FD17D
     # L106 :    webcal://edt.univ-angers.fr/edt/ics?id=S9F8A5BD6A6B788EDE0530100007FD17D
-    webcal_url = 'webcal://edt.univ-angers.fr/edt/ics?id=S9F8A5BD6A60A88EDE0530100007FD17D'
+    webcal_url = 'webcal://edt.univ-angers.fr/edt/ics?id=S9F8A5BD6A6B788EDE0530100007FD17D'
     
     if(est_calendrier_sauvable(webcal_url)):
         print("Calendrier enregistré")

@@ -1,6 +1,7 @@
 from ics import Calendar, Event
 import arrow
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timedelta
+from pytz import timezone
 from zoneinfo import ZoneInfo
 
 """
@@ -63,6 +64,7 @@ def printEvenementAtTime(calendar: Calendar, timeToCheck: datetime) -> None:
 
 def timeIsInEvent( begin: datetime, end: datetime, timeToCheck: datetime) -> bool:
 
+    # pip install tzdata
     # TIMEZONE LIST EXEMPLES
     # UTC +1: "Europe/Paris"
     # UTC +0: "Zulu"
@@ -73,9 +75,6 @@ def timeIsInEvent( begin: datetime, end: datetime, timeToCheck: datetime) -> boo
     return False
 
 
-
-
-
 def estSalleLibre(salle_file_path: str, timeToCheck: datetime) -> bool:
 
     # on ouvre le fichier ics de la salle :
@@ -84,16 +83,15 @@ def estSalleLibre(salle_file_path: str, timeToCheck: datetime) -> bool:
 
     #Si la salle a un evenement à "TimeToCheck" alors est n'est pas libre -> return false, sinon -> true
     #printEvenementToday(calendar)
-    france_timezone = ZoneInfo("America/New_York")
     for element in calendar.events: # on regarde tout les evenements d'une salle, si aucun d'eux ne pose problème, alors elle est libre
-        eventTime: datetime = element.begin.format()
-        element.begin = element.begin.replace(tzinfo=france_timezone)
-        element.end = element.end.replace(tzinfo=france_timezone)
+        #eventTime: datetime = element.begin.datetime
+        begin_lt = element.begin.astimezone(timezone("Europe/Paris")) # Begin local time
+        end_lt = element.end.astimezone(timezone("Europe/Paris")) # Begin local time
 
         if timeIsInEvent( element.begin , element.end, timeToCheck):
             # si la date que l'on cherche est dans l'évenement, ça dégage
             print(" ")
-            print( "FALSE :", element.begin , "-", element.end, " WITH ", element.name )
+            print( "FALSE :", begin_lt , "-", end_lt, " WITH ", element.name )
             return False
     print(" ")
     return True
@@ -115,18 +113,53 @@ def iterations_event(file_path: str) -> None:
 
 def main() -> None:
 
-    france_timezone = ZoneInfo("Europe/Paris")
-    customTime = datetime( 2024, 11, 22, 11, 0, 0)
-    customTime = customTime.replace(tzinfo=france_timezone)
-    #iterations_event('salles/L101 Multimédia.ics')
+    paris_tz = timezone("Europe/Paris")
 
-    #print( "Est libre ? :", customTime ," : ",estSalleLibre("salles/L101 Multimédia.ics", customTime) )
+    # with open("salles/L101 Multimédia.ics", 'r') as file:
+    #     calendar = Calendar(file.read())
+
+    #     for event in calendar.events:
+    #         #print(event.begin, " ", event.name)
+    #         # Convert event time to datetime (ensure timezone awareness)
+    #         event_time = event.begin.datetime  # Ensure we get a datetime object
+
+    #     # If the datetime is naive (no tzinfo), assume UTC
+    #         if event_time.tzinfo is None:
+    #             event_time = event_time.replace(tzinfo=timezone("UTC"))
+
+    #     # Convert to Paris time
+    #         local_time = event_time.astimezone(paris_tz)
+    #         print(local_time, " ", event.name)
+
+
+
+
+
+
+
+
+
+    customTime = datetime( 2024, 12, 6, 15, 55, 0)
+    customTime = customTime.replace(tzinfo=paris_tz)
+
 
     if estSalleLibre("salles/L101 Multimédia.ics", customTime):
         print(" L101 est libre ! :", customTime)
     else:
         print(" L101 prise à :", customTime)
     print(" ")
+
+    # if estSalleLibre("salles/L106 Multimédia.ics", customTime):
+    #     print(" L106 est libre ! :", customTime)
+    # else:
+    #     print(" L106 prise à :", customTime)
+    # print(" ")
+
+    # if estSalleLibre("salles/A116 Multimédia.ics", customTime):
+    #     print(" A116 est libre ! :", customTime)
+    # else:
+    #     print(" A116 prise à :", customTime)
+    # print(" ")
 
 
 if __name__ == "__main__":
