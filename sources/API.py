@@ -102,7 +102,7 @@ def est_bat_L(cal: CalendarXLink) -> bool:
     return est_dans_bat_etage_1_2(cal, "L") or (cal.nom in ("AMPHI L001", "AMPHI L002  ", "AMPHI L003 ", "AMPHI L004 ", "AMPHI L005", "AMPHI L006", "Rez-de-Jardin"))
 
 def est_salles_importante(cal: CalendarXLink) -> bool:
-    return est_bat_A(cal) or est_bat_G(cal) or est_bat_H(cal) or est_bat_i(cal) or est_bat_L(cal)
+    return est_bat_A(cal) or est_bat_G(cal) or est_bat_H(cal) or est_bat_I(cal) or est_bat_L(cal)
 
 # un premier essai de récupération des liens utiles
 def prototype_recherche_liens_edt_salles_univ_angers():
