@@ -103,7 +103,7 @@ def iterations_event(file_path: str) -> None:
 
 def print_salles_libre_at():
 
-    chemin_salles = "salles"
+    chemin_salles = "../salles_edt"
     paris_tz = timezone("Europe/Paris")
     customTime = datetime( 2024, 12, 6, 15, 55, 0)
     customTime = customTime.replace(tzinfo=paris_tz)
