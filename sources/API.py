@@ -39,7 +39,7 @@ def make_doc_name_ok(doc_name):
 
 
 # Renvoie Bool, + sauvegarde en local le fichier ics associé
-def est_calendrier_sauvable(cal: CalendarXLink, dossier: str = "../salles") -> bool:
+def est_calendrier_sauvable(cal: CalendarXLink, dossier: str = "../salles_edt") -> bool:
     
     http_url = cal.link.replace('webcal://', 'https://')
     
