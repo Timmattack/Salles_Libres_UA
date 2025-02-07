@@ -1,23 +1,29 @@
 <?php
+function afficheLesSallesLibres(string $fichier){
+	$jsonContent = file_get_contents($fichier);
 
-$jsonContent = file_get_contents("salles_libres/salles_libres_test.json");
+	$sallesLibres = json_decode($jsonContent, TRUE);
 
-$sallesLibres = json_decode($jsonContent, TRUE);
+// echo "<pre>";
+// prit_r($sallesLibres);
+// echo "<pre>";
 
 
-foreach($sallesLibres as $batiment=>$tabSalles){
-	echo "<fieldset>";
-	echo "<legend>$batiment</legend>";
+	foreach($sallesLibres as $batiment=>$tabSalles){
+		echo "<fieldset class=\"container\">";
+		echo "<legend>$batiment</legend>";
 	
-	if($tabSalles){
-		foreach($tabSalles as $salle){
-			echo "<p>$salle</p>";
+		if($tabSalles){
+			foreach($tabSalles as $salle){
+				echo "<p><a href=\"${salle["lien"]}\" target=\"_blank\">${salle["nom"]}</a></p>";
+			}
 		}
+		else{
+			echo "<p>PAS DE SALLE !!!!!</p>";
+		}
+	
+		echo "</fieldset>";
+	
 	}
-	else{
-		echo "<p>PAS DE SALLE !!!!!</p>";
-	}
-	echo "</fieldset>";	
 }
-
 ?>

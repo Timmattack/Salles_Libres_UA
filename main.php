@@ -1,3 +1,5 @@
+<?php require_once("les_salles.php")?>
+
 <!DOCTYPE html>
 <head>
 	<meta charset="utf-8" />
@@ -6,10 +8,11 @@
 </head>
 
 <body>
-<h1>Les salles libres de L'UA</h1>
+<h1>Les salles libres de L'UA (test test test)</h1>
 
 <div class="container">
-<?php require_once("les_salles.php")?>
+<?php afficheLesSallesLibres("/salles_libres/salles_libres_test.json")?>
+
 </div>
 
 </body>
