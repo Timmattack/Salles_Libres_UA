@@ -5,7 +5,7 @@ pip install requests ics bs4
 import requests
 from ics import Calendar
 from bs4 import BeautifulSoup
-
+from to_one_day import filtre_tous_ICS
 
 # edt salles univ angers (fac science): https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B
 
@@ -16,10 +16,18 @@ from bs4 import BeautifulSoup
 # exemple (case Amphi A): https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B&id=9F8A5BD6A61E88EDE0530100007FD17D
 #                                                                           La partie intéressante est ici   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+# Marre des noms de salle à rallonge >:(
+def make_name_simple(name: str) -> str:
+    nb = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    if name[1] in nb:
+        return name[0:4]
+    else:
+        return name
+
 
 class CalendarXLink:
-    def __init__(self, nom: str, id: str, racine: str = "webcal://edt.univ-angers.fr/edt/ics?id=S"):
-        self.nom = nom
+    def __init__(self, nom: str, id: str = "", racine: str = "webcal://edt.univ-angers.fr/edt/ics?id=S"):
+        self.nom = make_name_simple(nom)
         self.id = id
         
         self.link = racine + id
@@ -138,7 +146,7 @@ def link_to_id(link: str) -> str:
     return link[-32::]
 
 
-def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B"):
+def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B", dossier: str = "../salles_edt"):
     
     # Récupération de la page web
     response = requests.get(page_principale)
@@ -175,54 +183,14 @@ def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt
             
             if est_salles_importante(cal):
                 nb_enregistrées += 1
-                if(not est_calendrier_sauvable(cal)):
-                    print(f"{cal.nom} important, mais pas sauvegardé (ERREUR)")
+                if(not est_calendrier_sauvable(cal, dossier)):
+                    print(f"{cal.nom} : important, mais pas sauvegardé (ERREUR)")
                 else:
-                    print(f"{cal.nom} OK")
+                    print(f"{cal.nom} : OK")
             else:
-                print(f"{cal.nom} pas important")
+                print(f"{cal.nom} : pas important")
         
         print(f"Il y a {nb_enregistrées} salles importantes")
-
-
-# exemple avec amphi A: "https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B&id=9F8A5BD6A61E88EDE0530100007FD17D"
-# lien d'une salle:  type='id_page_principale'&id='id_de_la_salle'     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-def proto_affiche_une_semaine(cal: CalendarXLink, racine: str = "https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B"):
-    
-    page_une_salle = racine + "&id=" + cal.id
-    
-    response = requests.get(page_une_salle)
-    
-    if(response.status_code != 200):
-        print("code diff de 200 ("+response.status_code+"), fin de", cal.nom)
-    else:
-        print("soupage de", cal.nom)
-        
-        soup = BeautifulSoup(response.text, "html.parser")
-        
-        print(soup.prettify)
-        
-        # liste tous les th de class = "fc-day-header" (ils contiennent les infos sur la date)
-        filtre_th = soup.find_all("th", attrs={"class": "fc-day-header"})
-        
-        print(filtre_th)
-        
-        # trouve les div de class = "fc-content-col" (contient les évènements pour une journée donnée)
-        filtre_div = soup.find_all("div", attrs={"class": "fc-event-container"})
-        # on ne prend que ceux contenant uniquement l'attribut "fc-event-container"
-        filtre_div = [div for div in filtre_div if div.get("class") == ["fc-event-container"]]
-        
-        for i, date in enumerate(filtre_th):
-            print("------", date.text, "------")
-            
-            events = filtre_div[i].find_all("a")
-            
-            for event in events:
-                event = event.div
-                event("div")
-                print(event[0].text)
-                print(event[1].text)
-                print("-")
 
 
 """
@@ -254,13 +222,11 @@ def main():
     prototype_recherche_liens_edt_salles_univ_angers()
     '''
     
-    sauve_tous_calendrier()
+    sauve_tous_calendrier("https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B", "../salles_edt")
     
-    """
-    cal = CalendarXLink("Amphi A", "9F8A5BD6A61E88EDE0530100007FD17D")
     
-    proto_affiche_une_semaine(cal)
-    """
+    filtre_tous_ICS("../salles_edt")
+
 
 if __name__ == "__main__":
     main()
