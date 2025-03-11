@@ -4,6 +4,7 @@ from datetime import datetime, date, timedelta
 from pytz import timezone
 from zoneinfo import ZoneInfo
 from os import walk
+import json
 
 """
 Objectif:
@@ -103,17 +104,34 @@ def iterations_event(file_path: str) -> None:
 
 def print_salles_libre_at():
 
-    chemin_salles = "../salles_edt"
+    chemin_salles = "../salles_edt/"
     paris_tz = timezone("Europe/Paris")
-    customTime = datetime( 2024, 12, 6, 15, 55, 0)
+    customTime = datetime.now()
     customTime = customTime.replace(tzinfo=paris_tz)
 
     filenames = next(walk(chemin_salles), (None, None, []))[2]
 
+    filenames = [chemin_salles+file for file in filenames]
+
+    exportJson = {}
+
     for file in filenames:
         #print(file)
         if est_salle_libre(file, customTime):
-            print(file, "est libre")
+            #print(file, "est libre")
+            #print(file, " LIEN SALLE", )
+            
+
+            
+            exportJson[file] = "est libre"
+        else:
+            print(file, "est pas libre")
+
+    print(exportJson)
+    print(len(exportJson))
+
+    with open("../salles_libres/salles_libres_beta.json", "w", encoding="utf-8") as f:
+        json.dump(exportJson, f, ensure_ascii=False);
 
 
 
@@ -122,7 +140,7 @@ def main() -> None:
 
 
     print_salles_libre_at()
-
+    #print(datetime.now())
 
 
 if __name__ == "__main__":
