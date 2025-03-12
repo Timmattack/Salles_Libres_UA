@@ -38,6 +38,7 @@ def filtre_tous_ICS(dossier: str):
     
     for file in filenames:
         filtre_ICS(file)
+        print(f"{file} raccourci")
 
 
 if __name__ == "__main__":
