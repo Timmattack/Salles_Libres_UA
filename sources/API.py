@@ -225,7 +225,7 @@ def main():
     sauve_tous_calendrier("https://edt.univ-angers.fr/edt/ressources?id=s9FDC055BB1C34F92E0530100007F467B", "../salles_edt")
     
     
-    filtre_tous_ICS("../salles_edt")
+    filtre_tous_ICS("../salles_edt/")
 
 
 if __name__ == "__main__":
