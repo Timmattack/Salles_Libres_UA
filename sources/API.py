@@ -85,32 +85,32 @@ On dira que les salles intéressantes sont:
 - Rez de jardin (:
 """
 
-def est_dans_bat_etage_1_2(cal: CalendarXLink, bat: chr) -> bool:
+def est_dans_bat_etage_1_2(nom: str, bat: chr) -> bool:
     #On récupère les 2 premiers charactères du nom
-    pref = cal.nom[:2]
+    pref = nom[:2]
     
     return (pref == bat+"1") or (pref == bat+"2")
 
 
-def est_bat_A(cal: CalendarXLink) -> bool:
-    return est_dans_bat_etage_1_2(cal, 'A') or (cal.nom in ("AMPHI A Sciences", "AMPHI B Sciences", "AMPHI D Sciences", "AMPHI E Sciences"))
+def est_bat_A(nom: str) -> bool:
+    return est_dans_bat_etage_1_2(nom, 'A') or (nom in ("AMPHI A Sciences", "AMPHI B Sciences", "AMPHI D Sciences", "AMPHI E Sciences"))
 
-def est_bat_G(cal: CalendarXLink) -> bool:
-    return est_dans_bat_etage_1_2(cal, "G")
+def est_bat_G(nom: str) -> bool:
+    return est_dans_bat_etage_1_2(nom, "G")
 
-def est_bat_H(cal: CalendarXLink) -> bool:
-    return est_dans_bat_etage_1_2(cal, "H")
+def est_bat_H(nom: str) -> bool:
+    return est_dans_bat_etage_1_2(nom, "H")
 
-def est_bat_I(cal: CalendarXLink) -> bool:
-    pref = cal.nom[:2]
+def est_bat_I(nom: str) -> bool:
+    pref = nom[:2]
     return (pref == "I0")
 
-def est_bat_L(cal: CalendarXLink) -> bool:
+def est_bat_L(nom: str) -> bool:
     # les espaces en plus aux noms d'amphis sont fait exprès :D (le fichier html est fait comme ça)
-    return est_dans_bat_etage_1_2(cal, "L") or (cal.nom in ("AMPHI L001", "AMPHI L002  ", "AMPHI L003 ", "AMPHI L004 ", "AMPHI L005", "AMPHI L006", "Rez-de-Jardin"))
+    return est_dans_bat_etage_1_2(nom, "L") or (nom in ("AMPHI L001", "AMPHI L002  ", "AMPHI L003 ", "AMPHI L004 ", "AMPHI L005", "AMPHI L006", "Rez-de-Jardin"))
 
-def est_salles_importante(cal: CalendarXLink) -> bool:
-    return est_bat_A(cal) or est_bat_G(cal) or est_bat_H(cal) or est_bat_I(cal) or est_bat_L(cal)
+def est_salles_importante(nom: str) -> bool:
+    return est_bat_A(nom) or est_bat_G(nom) or est_bat_H(nom) or est_bat_I(nom) or est_bat_L(nom)
 
 # un premier essai de récupération des liens utiles
 def prototype_recherche_liens_edt_salles_univ_angers():
@@ -181,7 +181,7 @@ def sauve_tous_calendrier(page_principale: str = "https://edt.univ-angers.fr/edt
             
             cal = CalendarXLink(nom, link_to_id(link))
             
-            if est_salles_importante(cal):
+            if est_salles_importante(cal.nom):
                 nb_enregistrées += 1
                 if(not est_calendrier_sauvable(cal, dossier)):
                     print(f"{cal.nom} : important, mais pas sauvegardé (ERREUR)")
