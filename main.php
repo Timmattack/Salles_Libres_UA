@@ -11,7 +11,7 @@
 <h1>Les salles libres de L'UA (test test test)</h1>
 
 <div class="container">
-<?php afficheLesSallesLibres("/salles_libres/salles_libres_beta.json")?>
+<?php afficheLesSallesLibres("/salles_libres/salles_libres.json")?>
 
 </div>
 
