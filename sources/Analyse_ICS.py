@@ -69,7 +69,7 @@ def InitDicSalle(nom: str, lien: str):
     }
     
     TheDict["nom"] = nom
-    TheDict["link"] = lien
+    TheDict["lien"] = lien
     
     return TheDict
 
