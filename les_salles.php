@@ -1,9 +1,14 @@
 <?php
+function cmpSalles($salle1, $salle2){
+	return $salle1["nom"] <=> $salle2["nom"];
+}
+
+
 function afficheLesSallesLibres(string $fichier){
 	$jsonContent = file_get_contents($fichier);
 
 	$sallesLibres = json_decode($jsonContent, TRUE);
-
+	
 	$PAS_DE_PROCHAIN = 'sera toujours libre';
 // echo "<pre>";
 // prit_r($sallesLibres);
@@ -15,6 +20,7 @@ function afficheLesSallesLibres(string $fichier){
 		echo "<legend>$batiment</legend>";
 	
 		if($tabSalles){
+			usort($tabSalles, "cmpSalles");
 			foreach($tabSalles as $salle){
 				$prochain_event = $salle["prochain_occupe"] ?? $PAS_DE_PROCHAIN;
 				echo "<p><a href=\"${salle["lien"]}\" target=\"_blank\">${salle["nom"]}</a> ($prochain_event) </p>";
