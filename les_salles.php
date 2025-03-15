@@ -4,6 +4,7 @@ function afficheLesSallesLibres(string $fichier){
 
 	$sallesLibres = json_decode($jsonContent, TRUE);
 
+	$PAS_DE_PROCHAIN = 'sera toujours libre';
 // echo "<pre>";
 // prit_r($sallesLibres);
 // echo "<pre>";
@@ -15,7 +16,8 @@ function afficheLesSallesLibres(string $fichier){
 	
 		if($tabSalles){
 			foreach($tabSalles as $salle){
-				echo "<p><a href=\"${salle["lien"]}\" target=\"_blank\">${salle["nom"]}</a></p>";
+				$prochain_event = salle["prochain_occupe"] ?? $PAS_DE_PROCHAIN;
+				echo "<p><a href=\"${salle["lien"]}\" target=\"_blank\">${salle["nom"]}</a> ($prochain_event) </p>";
 			}
 		}
 		else{
