@@ -16,7 +16,7 @@ function afficheLesSallesLibres(string $fichier){
 	
 		if($tabSalles){
 			foreach($tabSalles as $salle){
-				$prochain_event = salle["prochain_occupe"] ?? $PAS_DE_PROCHAIN;
+				$prochain_event = $salle["prochain_occupe"] ?? $PAS_DE_PROCHAIN;
 				echo "<p><a href=\"${salle["lien"]}\" target=\"_blank\">${salle["nom"]}</a> ($prochain_event) </p>";
 			}
 		}
