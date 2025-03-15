@@ -59,28 +59,51 @@ def extraitID(fic: str):
 
     premier_event = next(iter(cal.events), None)
 
-    return premier_event.uid[1:33]
+    premier_event.uid[1:33]
 
 
-def InitDicSalle(nom: str, lien: str):
+def InitDicSalle(nom: str, lien: str, prochain_occupe: str):
     TheDict = {
     "nom": "",
-    "lien": ""
+    "lien": "",
+    "prochain_occupe": ""
     }
     
     TheDict["nom"] = nom
     TheDict["lien"] = lien
+    TheDict["prochain_occupe"] = prochain_occupe
     
     return TheDict
 
 
-def sallesBat_X(est_bat_X, fic_salles_libres: str, nom_salles_libres, RACINE: str = "https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B&id="):  
+def sallesBat_X(est_bat_X, fic_salles_libres: str, nom_salles_libres, end: arrow, RACINE: str = "https://edt.univ-angers.fr/edt/ressource?type=s9FDC055BB1C34F92E0530100007F467B&id="):
     
     sallesBX = []
     for fic, nom_salle in zip(fic_salles_libres, nom_salles_libres):
         if est_bat_X(make_name_simple(nom_salle)):
-            id = extraitID(fic)
-            sallesBX.append(InitDicSalle(make_name_simple(nom_salle), RACINE+id))
+            
+            # On extrait l'id du calendrier
+            with open(fic, "r", encoding="utf-8") as fichier:
+                contenu = fichier.read()
+
+            cal = Calendar(contenu)
+
+            premier_event = next(iter(cal.events), None)
+
+            id = premier_event.uid[1:33]
+            
+            # Puis l'heure de son prochain event ('demain' sinon)
+            timeline = Timeline(cal)
+            
+            next_event = next(timeline.start_after(end), None)
+            
+            if(next_event):
+                prochain_occupe = next_event.begin.format('HH [h] mm')
+            else:
+                prochain_occupe = None
+            
+            
+            sallesBX.append(InitDicSalle(make_name_simple(nom_salle), RACINE+id, prochain_occupe))
     
     return sallesBX
 
@@ -103,11 +126,11 @@ def main() -> None:
     "Batiment L": []
     }
     
-    JSON_Result["Batiment A"] = sallesBat_X(est_bat_A, fic_salles_libres, nom_salles_libres)
-    JSON_Result["Batiment G"] = sallesBat_X(est_bat_G, fic_salles_libres, nom_salles_libres)
-    JSON_Result["Batiment H"] = sallesBat_X(est_bat_H, fic_salles_libres, nom_salles_libres)
-    JSON_Result["Batiment I"] = sallesBat_X(est_bat_I, fic_salles_libres, nom_salles_libres)
-    JSON_Result["Batiment L"] = sallesBat_X(est_bat_L, fic_salles_libres, nom_salles_libres)
+    JSON_Result["Batiment A"] = sallesBat_X(est_bat_A, fic_salles_libres, nom_salles_libres, end)
+    JSON_Result["Batiment G"] = sallesBat_X(est_bat_G, fic_salles_libres, nom_salles_libres, end)
+    JSON_Result["Batiment H"] = sallesBat_X(est_bat_H, fic_salles_libres, nom_salles_libres, end)
+    JSON_Result["Batiment I"] = sallesBat_X(est_bat_I, fic_salles_libres, nom_salles_libres, end)
+    JSON_Result["Batiment L"] = sallesBat_X(est_bat_L, fic_salles_libres, nom_salles_libres, end)
     
     with open("../salles_libres/salles_libres.json", 'w') as f:
         json.dump(JSON_Result, f)
