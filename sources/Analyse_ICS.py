@@ -98,7 +98,9 @@ def sallesBat_X(est_bat_X, fic_salles_libres: str, nom_salles_libres, end: arrow
             next_event = next(timeline.start_after(end), None)
             
             if(next_event):
-                prochain_occupe = next_event.begin.format('HH [h] mm')
+                prochain_occupe = next_event.begin
+                                            .to('local')
+                                            .format('HH [h] mm')
             else:
                 prochain_occupe = None
             
