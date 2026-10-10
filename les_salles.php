@@ -5,19 +5,18 @@ function cmpSalles($salle1, $salle2){
 
 
 function afficheLesSallesLibres(string $fichier){
-	$jsonContent = file_get_contents($fichier);
 
+	$jsonContent = file_get_contents($fichier);
 	$sallesLibres = json_decode($jsonContent, TRUE);
 	
 	$PAS_DE_PROCHAIN = 'sera toujours libre';
 // echo "<pre>";
-// prit_r($sallesLibres);
+// print_r($sallesLibres);
 // echo "<pre>";
 
-
 	foreach($sallesLibres as $batiment=>$tabSalles){
-		echo "<fieldset class=\"container\">";
-		echo "<legend>$batiment</legend>";
+		echo "<fieldset class=\"container m-6 border\">";
+		echo "<legend class='float-none w-auto px-3'>$batiment</legend>";
 	
 		if($tabSalles){
 			usort($tabSalles, "cmpSalles");

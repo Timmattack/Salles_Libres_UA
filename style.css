@@ -1,7 +1,23 @@
-.container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+
+testclass {
+  font-family: Impact;
+  color: red;
+}
+
+col-silver {
+  background-color: #C4C7CE;
+}
+
+col-gray {
+  color: #E6E6E4;
+}
+
+col-mint {
+  color: #F0FAF5;
+}
+
+col-blue {
+  color: #9097FD;
 }
 
 fieldset {
